@@ -68,22 +68,29 @@ namespace TestAcceleration
         /// <summary>
         /// a method that initializes the variables needed for computing the S-curve motion profile
         /// </summary>
-        /// <param name="inputVelocity"></param>
-        /// <param name="initialPosition"></param>
-        /// <param name="finalPosition"></param>
-        /// <param name="initialVelocity"></param>
-        public virtual void InitializeMotionProfileParameters(double inputVelocity, double initialPosition, double finalPosition, double initialVelocity = 0)
+        /// <param name="inputVelocity">the target velocity you are trying to get to</param>
+        /// <param name="initialPosition">the position you start at</param>
+        /// <param name="finalPosition">the position you are trying to get to</param>
+        /// <param name="initialVelocity">in the case that you start at a non-zero velocity</param>
+        /// <param name="accelerationSmoothness">decides how smooth the acceleration is or in other words if there will be points where acceleration is constant.
+        /// NOTE: minimum value = 1.0 (Trapezoid: acceleration is always constant) maximum value = 2.0 (Perfect S-Curve: acceleration is never cosntant)</param>
+        public virtual void InitializeMotionProfileParameters(double inputVelocity, double initialPosition, double finalPosition, double initialVelocity = 0, double accelerationSmoothness = 2.0)
         {
             initialPoint = initialPosition;
             CurrentPoint = initialPosition;
             finalPoint = finalPosition;
             DistanceTraveled = Math.Abs(finalPosition - initialPosition);
 
-            double accelerationSmoothness = 1.8;
-            if (DistanceTraveled < inputVelocity * 3)
-                accelerationSmoothness = 1.5;
-            if (DistanceTraveled < inputVelocity * 2)
-                accelerationSmoothness = 1.1;
+            //double accelerationSmoothness = 1.8;
+            //if (DistanceTraveled < inputVelocity * 3)
+            //    accelerationSmoothness = 1.5;
+            //if (DistanceTraveled < inputVelocity * 2)
+            //    accelerationSmoothness = 1.1;
+
+            if (accelerationSmoothness > 2.0)
+                accelerationSmoothness = 2.0;
+            if (accelerationSmoothness < 1.0)
+                accelerationSmoothness = 1.0;
 
             if (DistanceTraveled < inputVelocity)
                 inputVelocity = DistanceTraveled;
@@ -135,11 +142,12 @@ namespace TestAcceleration
         }
 
         /// <summary>
-        /// 
+        /// The method outputs the current displacement based on the parameters given upon calling 
+        /// InitializeMotionProfileParameters and the current time elapsed inputted
         /// </summary>
-        /// <param name="time"></param>
-        /// <param name="point"></param>
-        /// <returns></returns>
+        /// <param name="time">The current time that elapsed since start of the motion.</param>
+        /// <param name="point">the point at the given time</param>
+        /// <returns>returns whether or not the action was successful</returns>
         public bool TryGetPointAtGivenTime(double time, out double point)
         {
             if (time <= TotalTime)
@@ -153,10 +161,11 @@ namespace TestAcceleration
         }
 
         /// <summary>
-        /// 
+        /// The method outputs the current displacement based on the parameters given upon calling 
+        /// InitializeMotionProfileParameters and the current time elapsed inputted
         /// </summary>
-        /// <param name="time"></param>
-        /// <returns></returns>
+        /// <param name="time">The current time that elapsed since start of the motion.</param>
+        /// <returns>the point at the given time</returns>
         public virtual double GetPointAtGivenTime(double time)
         {
             double multiplier = (finalPoint - initialPoint) / DistanceTraveled;

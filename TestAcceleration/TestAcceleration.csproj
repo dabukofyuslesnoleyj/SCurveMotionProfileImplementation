@@ -49,6 +49,7 @@
     <Compile Include="CpMidPointMotionProfile.cs" />
     <Compile Include="LocationHistory.cs" />
     <Compile Include="MotionProfile.cs" />
+    <Compile Include="MotionTester.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
